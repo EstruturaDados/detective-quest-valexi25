@@ -1,0 +1,121 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// --- DEFINIÇÃO DA ESTRUTURA ---
+// Representa um nó da árvore (uma sala da mansão)
+typedef struct Sala {
+    char nome[50];
+    struct Sala *esquerda; // Caminho para a esquerda
+    struct Sala *direita;  // Caminho para a direita
+} Sala;
+
+// --- PROTÓTIPOS DAS FUNÇÕES ---
+Sala* criarSala(char* nome);
+void explorarSalas(Sala* raiz);
+void liberarMemoria(Sala* raiz);
+
+// --- FUNÇÃO PRINCIPAL ---
+int main() {
+    // 1. Construção do Mapa (Árvore Binária)
+    // A estrutura é montada manualmente conforme o nível novato
+    
+    // Raiz
+    Sala* hall = criarSala("Hall de Entrada");
+    
+    // Nível 1
+    hall->esquerda = criarSala("Biblioteca");
+    hall->direita = criarSala("Sala de Jantar");
+    
+    // Nível 2 (Filhos da Biblioteca)
+    hall->esquerda->esquerda = criarSala("Escritorio Secreto");
+    hall->esquerda->direita = criarSala("Jardim de Inverno");
+    
+    // Nível 2 (Filhos da Sala de Jantar)
+    hall->direita->esquerda = criarSala("Cozinha");
+    hall->direita->direita = criarSala("Salao de Baile");
+
+    // 2. Início do Jogo
+    printf("=== DETECTIVE QUEST: A MANSAO ===\n");
+    printf("Encontre as pistas navegando pelos comodos.\n");
+    
+    // Inicia a navegação a partir da raiz
+    explorarSalas(hall);
+
+    // 3. Limpeza (Boa prática)
+    liberarMemoria(hall);
+    
+    return 0;
+}
+
+// --- IMPLEMENTAÇÃO DAS FUNÇÕES ---
+
+// Cria, de forma dinâmica, uma sala com nome e ponteiros nulos
+Sala* criarSala(char* nome) {
+    Sala* nova = (Sala*) malloc(sizeof(Sala));
+    if (nova == NULL) {
+        printf("Erro de alocacao de memoria!\n");
+        exit(1);
+    }
+    strcpy(nova->nome, nome);
+    nova->esquerda = NULL;
+    nova->direita = NULL;
+    return nova;
+}
+
+// Permite a navegação do jogador pela árvore
+void explorarSalas(Sala* atual) {
+    char escolha;
+
+    while (atual != NULL) {
+        printf("\n-----------------------------------\n");
+        printf("Voce esta em: [ %s ]\n", atual->nome);
+
+        // Verifica se é um nó-folha (sem saídas)
+        if (atual->esquerda == NULL && atual->direita == NULL) {
+            printf("\n>>> Fim da linha! Este comodo nao tem mais saidas.\n");
+            printf(">>> Investigacao encerrada nesta rota.\n");
+            break; 
+        }
+
+        // Mostra opções disponíveis
+        printf("Para onde deseja ir?\n");
+        if (atual->esquerda != NULL) printf("[e] Esquerda (%s)\n", atual->esquerda->nome);
+        if (atual->direita != NULL) printf("[d] Direita (%s)\n", atual->direita->nome);
+        printf("[s] Sair do jogo\n");
+        
+        printf("Escolha: ");
+        scanf(" %c", &escolha); // Espaço antes do %c limpa o buffer
+
+        if (escolha == 'e' || escolha == 'E') {
+            if (atual->esquerda != NULL) {
+                atual = atual->esquerda; // Move o ponteiro para o filho esquerdo
+            } else {
+                printf("Nao ha caminho para a esquerda aqui!\n");
+            }
+        } 
+        else if (escolha == 'd' || escolha == 'D') {
+            if (atual->direita != NULL) {
+                atual = atual->direita; // Move o ponteiro para o filho direito
+            } else {
+                printf("Nao ha caminho para a direita aqui!\n");
+            }
+        } 
+        else if (escolha == 's' || escolha == 'S') {
+            printf("Saindo da mansao...\n");
+            break;
+        } 
+        else {
+            printf("Opcao invalida!\n");
+        }
+    }
+}
+
+// Função auxiliar para liberar a memória ao final (Recursiva)
+void liberarMemoria(Sala* raiz) {
+    if (raiz != NULL) {
+        liberarMemoria(raiz->esquerda);
+        liberarMemoria(raiz->direita);
+        free(raiz);
+    }
+}
